@@ -44,10 +44,10 @@ private:
 	UStaticMeshComponent *GhostVulnerableMeshComponent;
 	class APacManPawn *PacManPawn;
 	class AAIController *AIGhostController;
+	class UBlackboardComponent *AIGhostBlackboardComponent;
 	class APacManGameMode *PacManGameMode;
 	float StartDelay = 3.f;
 
 	UFUNCTION()
 	void OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, FVector NormalImpulse, const FHitResult &Hit);
-	void UpdateMovementTarget();
 };

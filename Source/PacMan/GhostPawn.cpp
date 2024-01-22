@@ -5,6 +5,7 @@
 #include "PacManGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 // Sets default values
 AGhostPawn::AGhostPawn()
@@ -35,6 +36,7 @@ void AGhostPawn::BeginPlay()
 	MeshComponent->OnComponentHit.AddDynamic(this, &AGhostPawn::OnActorHit);
 	PacManPawn = Cast<APacManPawn>(UGameplayStatics::GetPlayerPawn(this, 0));
 	AIGhostController = Cast<AAIController>(GetController());
+	AIGhostBlackboardComponent = AIGhostController->GetBlackboardComponent();
 	PacManGameMode = Cast<APacManGameMode>(UGameplayStatics::GetGameMode(this));
 
 	FTimerHandle GhostEnabledTimerHandle;
@@ -47,7 +49,8 @@ void AGhostPawn::Hunt()
 	GhostState = EGhostState::Chasing;
 	GhostDefaultMeshComponent->SetVisibility(true);
 	GhostVulnerableMeshComponent->SetVisibility(false);
-	UpdateMovementTarget();
+	AIGhostBlackboardComponent->SetValueAsBool("IsChasing", true);
+	AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
 }
 
 void AGhostPawn::Flee()
@@ -55,13 +58,14 @@ void AGhostPawn::Flee()
 	GhostState = EGhostState::Fleeing;
 	GhostDefaultMeshComponent->SetVisibility(false);
 	GhostVulnerableMeshComponent->SetVisibility(true);
-	UpdateMovementTarget();
+	AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
+	AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
 }
 
 void AGhostPawn::Idle()
 {
 	GhostState = EGhostState::Idle;
-	UpdateMovementTarget();
+	AIGhostBlackboardComponent->SetValueAsBool("IsIdle", true);
 }
 
 void AGhostPawn::OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, FVector NormalImpulse, const FHitResult &Hit)
@@ -70,24 +74,5 @@ void AGhostPawn::OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UP
 	{
 		PacManGameMode->ActorEaten(OtherActor);
 		Idle();
-	}
-}
-
-void AGhostPawn::UpdateMovementTarget()
-{
-	if (AIGhostController)
-	{
-		switch (GhostState)
-		{
-		case EGhostState::Chasing:
-			AIGhostController->MoveToActor(PacManPawn, 0, false);
-			break;
-		case EGhostState::Fleeing:
-			// TODO: Flee
-			break;
-		case EGhostState::Idle:
-			AIGhostController->StopMovement();
-			break;
-		}
 	}
 }
