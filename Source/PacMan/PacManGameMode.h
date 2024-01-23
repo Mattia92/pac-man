@@ -17,12 +17,13 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+public:
+	float StartDelay = 3.f;
 
 private:
 	class APacManPlayerController *PacManPlayerController;
 	class ACameraActor *ViewTargetActor;
 	TArray<AActor *> Ghosts;
-	float StartDelay = 3.f;
 	int32 RegularPickups = 0;
 
 	void HandleGameStart();

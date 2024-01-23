@@ -30,7 +30,7 @@ void APacManGameMode::ActorEaten(AActor *EatenActor)
             for(AActor* Actor : Ghosts)
             {
                 AGhostPawn* Ghost = Cast<AGhostPawn>(Actor);
-                Ghost->Flee();
+                Ghost->Frightened();
             }
         }
         
@@ -51,7 +51,7 @@ void APacManGameMode::HandleGameStart()
     RegularPickups = GetRegularPickupCount();
 
     PacManPlayerController = Cast<APacManPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-    ViewTargetActor = Cast<ACameraActor>(UGameplayStatics::GetActorOfClass(GetWorld(), ACameraActor::StaticClass()));
+    ViewTargetActor = Cast<ACameraActor>(UGameplayStatics::GetActorOfClass(this, ACameraActor::StaticClass()));
     UGameplayStatics::GetAllActorsOfClass(this, AGhostPawn::StaticClass(), Ghosts);
 
     if (PacManPlayerController && ViewTargetActor)
@@ -63,12 +63,12 @@ void APacManGameMode::HandleGameStart()
         FTimerDelegate PlayerEnabledTimerDelegate = FTimerDelegate::CreateUObject(PacManPlayerController, &APacManPlayerController::SetPlayerEnabledState, true);
         GetWorldTimerManager().SetTimer(PlayerEnabledTimerHandle, PlayerEnabledTimerDelegate, StartDelay, false);
     }
+    
 }
 
 int32 APacManGameMode::GetRegularPickupCount()
 {
     TArray<AActor *> Pickups;
     UGameplayStatics::GetAllActorsOfClassWithTag(this, APickup::StaticClass(), "Regular", Pickups);
-    UE_LOG(LogTemp, Display, TEXT("TOT REG PICK: %s"), *FString::FromInt(Pickups.Num()));
     return Pickups.Num();
 }

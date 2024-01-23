@@ -9,8 +9,9 @@
 UENUM()
 enum class EGhostState : uint8
 {
-	Chasing,
-	Fleeing,
+	Chase,
+	Scatter,
+	Frightened,
 	Idle
 };
 
@@ -29,10 +30,11 @@ protected:
 
 public:
 	UPROPERTY(EditAnywhere)
-	EGhostState GhostState = EGhostState::Chasing;
+	EGhostState GhostState = EGhostState::Idle;
 
-	void Hunt();
-	void Flee();
+	void Chase();
+	void Scatter();
+	void Frightened();
 	void Idle();
 
 private:
@@ -42,12 +44,21 @@ private:
 	UStaticMeshComponent *GhostDefaultMeshComponent;
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent *GhostVulnerableMeshComponent;
+	UPROPERTY(EditAnywhere)
+	class AWaveManager *WaveManager;
 	class APacManPawn *PacManPawn;
 	class AAIController *AIGhostController;
 	class UBlackboardComponent *AIGhostBlackboardComponent;
 	class APacManGameMode *PacManGameMode;
-	float StartDelay = 3.f;
+	FTimerHandle GhostScatterPhaseTimerHandle;
+	FTimerHandle GhostChasePhaseTimerHandle;
 
 	UFUNCTION()
 	void OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, FVector NormalImpulse, const FHitResult &Hit);
+	void StartPhaseOne();
+	void StartPhaseTwo();
+	void StartPhaseThree();
+	void StartPhaseFour();
+	void StartFrightenedMode();
+	void EndFrightenedMode(EGhostState GhostState);
 };
