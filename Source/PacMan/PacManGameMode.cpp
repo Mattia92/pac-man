@@ -43,6 +43,10 @@ void APacManGameMode::ActorEaten(AActor *EatenActor)
     {
         PacManPawn->HandleDestruction();
     }
+    else if (AGhostPawn *GhostPawn = Cast<AGhostPawn>(EatenActor))
+    {
+        GhostPawn->HandleDestruction();
+    }
     
 }
 

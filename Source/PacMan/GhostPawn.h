@@ -12,7 +12,8 @@ enum class EGhostState : uint8
 	Chase,
 	Scatter,
 	Frightened,
-	Idle
+	Idle,
+	Dead
 };
 
 UCLASS()
@@ -28,14 +29,17 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:
-	UPROPERTY(EditAnywhere)
+protected:
 	EGhostState GhostState = EGhostState::Idle;
 
+public:
+	EGhostState GetGhostState() { return GhostState; }
 	void Chase();
 	void Scatter();
 	void Frightened();
 	void Idle();
+	void Dead();
+	void HandleDestruction();
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -45,13 +49,26 @@ private:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent *GhostVulnerableMeshComponent;
 	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent *GhostDeadMeshComponent;
+	UPROPERTY(EditAnywhere)
+	class UFloatingPawnMovement *GhostFloatingPawnMovement;
+	UPROPERTY(EditAnywhere)
 	class AWaveManager *WaveManager;
+	UPROPERTY(EditAnywhere)
+	float MaxSpeed = 500.f;
+	UPROPERTY(EditAnywhere)
+	float MaxSpeedFrightened = 250.f;
+	UPROPERTY(EditAnywhere)
+	float Acceleration = 4000.f;
+
 	class APacManPawn *PacManPawn;
 	class AAIController *AIGhostController;
 	class UBlackboardComponent *AIGhostBlackboardComponent;
 	class APacManGameMode *PacManGameMode;
 	FTimerHandle GhostScatterPhaseTimerHandle;
 	FTimerHandle GhostChasePhaseTimerHandle;
+	FTimerHandle GhostFrightenedTimerHandle;
+	EGhostState PreviousGhostState;
 
 	UFUNCTION()
 	void OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, FVector NormalImpulse, const FHitResult &Hit);
@@ -60,5 +77,5 @@ private:
 	void StartPhaseThree();
 	void StartPhaseFour();
 	void StartFrightenedMode();
-	void EndFrightenedMode(EGhostState GhostState);
+	void EndFrightenedMode();
 };

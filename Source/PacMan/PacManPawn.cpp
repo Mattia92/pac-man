@@ -3,6 +3,7 @@
 #include "PacManPawn.h"
 #include "Pickup.h"
 #include "PacManGameMode.h"
+#include "GhostPawn.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -67,9 +68,18 @@ void APacManPawn::HandleDestruction()
 
 void APacManPawn::OnOverlapBegin(AActor *PlayerActor, AActor *OtherActor)
 {
-	APickup *PickUp = Cast<APickup>(OtherActor);
-	if (PacManGameMode && PickUp)
+	if (PacManGameMode)
 	{
-		PacManGameMode->ActorEaten(PickUp);
+		if (APickup *PickUp = Cast<APickup>(OtherActor))
+		{
+			PacManGameMode->ActorEaten(PickUp);
+    	}
+    	else if (AGhostPawn *GhostPawn = Cast<AGhostPawn>(OtherActor))
+    	{
+			if (GhostPawn->GetGhostState() == EGhostState::Frightened)
+			{
+				PacManGameMode->ActorEaten(GhostPawn);
+			}
+    	}
 	}
 }

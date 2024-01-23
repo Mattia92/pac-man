@@ -5,6 +5,7 @@
 #include "PacManGameMode.h"
 #include "WaveManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/FloatingPawnMovement.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -15,7 +16,7 @@ AGhostPawn::AGhostPawn()
 	PrimaryActorTick.bCanEverTick = false;
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
-	MeshComponent->SetCollisionProfileName(FName("Pawn"));
+	MeshComponent->SetCollisionProfileName(FName("Ghost"));
 	MeshComponent->SetEnableGravity(false);
 	MeshComponent->SetVisibility(false);
 	RootComponent = MeshComponent;
@@ -27,6 +28,13 @@ AGhostPawn::AGhostPawn()
 	GhostVulnerableMeshComponent->SetCollisionProfileName(FName("NoCollision"));
 	GhostVulnerableMeshComponent->SetVisibility(false);
 	GhostVulnerableMeshComponent->SetupAttachment(RootComponent);
+	GhostDeadMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Ghost Dead Mesh Component"));
+	GhostDeadMeshComponent->SetCollisionProfileName(FName("NoCollision"));
+	GhostDeadMeshComponent->SetVisibility(false);
+	GhostDeadMeshComponent->SetupAttachment(RootComponent);
+	GhostFloatingPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Ghost Pawn Movement"));
+	GhostFloatingPawnMovement->MaxSpeed = MaxSpeed;
+	GhostFloatingPawnMovement->Acceleration = Acceleration;
 }
 
 // Called when the game starts or when spawned
@@ -53,10 +61,12 @@ void AGhostPawn::Chase()
 	GhostState = EGhostState::Chase;
 	GhostDefaultMeshComponent->SetVisibility(true);
 	GhostVulnerableMeshComponent->SetVisibility(false);
+	GhostDeadMeshComponent->SetVisibility(false);
 	AIGhostBlackboardComponent->SetValueAsBool("IsChasing", true);
 	AIGhostBlackboardComponent->SetValueAsBool("IsScattering", false);
 	AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", false);
 	AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
+	AIGhostBlackboardComponent->SetValueAsBool("IsDead", false);
 }
 
 void AGhostPawn::Scatter()
@@ -64,29 +74,31 @@ void AGhostPawn::Scatter()
 	GhostState = EGhostState::Scatter;
 	GhostDefaultMeshComponent->SetVisibility(true);
 	GhostVulnerableMeshComponent->SetVisibility(false);
+	GhostDeadMeshComponent->SetVisibility(false);
 	AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
 	AIGhostBlackboardComponent->SetValueAsBool("IsScattering", true);
 	AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", false);
 	AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
+	AIGhostBlackboardComponent->SetValueAsBool("IsDead", false);
 }
 
 void AGhostPawn::Frightened()
 {
-	EGhostState OldGhostState = GhostState;
+	PreviousGhostState = GhostState;
 	GhostState = EGhostState::Frightened;
 	GhostDefaultMeshComponent->SetVisibility(false);
 	GhostVulnerableMeshComponent->SetVisibility(true);
+	GhostDeadMeshComponent->SetVisibility(false);
 	AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
 	AIGhostBlackboardComponent->SetValueAsBool("IsScattering", false);
 	AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", true);
 	AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
+	AIGhostBlackboardComponent->SetValueAsBool("IsDead", false);
 	
 	if (WaveManager)
-	{
-		FTimerHandle GhostFrightenedTimerHandle;
-		FTimerDelegate GhostFrightenedTimerDelegate = FTimerDelegate::CreateUObject(this, &AGhostPawn::EndFrightenedMode, OldGhostState);
+	{		
 		StartFrightenedMode();
-		GetWorldTimerManager().SetTimer(GhostFrightenedTimerHandle,GhostFrightenedTimerDelegate, WaveManager->FrightenedDuration, false);
+		GetWorldTimerManager().SetTimer(GhostFrightenedTimerHandle, this, &AGhostPawn::EndFrightenedMode, WaveManager->FrightenedDuration, false);
 	}
 }
 
@@ -97,6 +109,28 @@ void AGhostPawn::Idle()
 	AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
 	AIGhostBlackboardComponent->SetValueAsBool("IsScattering", false);
 	AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", false);
+	AIGhostBlackboardComponent->SetValueAsBool("IsDead", false);
+}
+
+void AGhostPawn::Dead()
+{
+	GhostState = EGhostState::Dead;
+	GhostDefaultMeshComponent->SetVisibility(false);
+	GhostVulnerableMeshComponent->SetVisibility(false);
+	GhostDeadMeshComponent->SetVisibility(true);
+	AIGhostBlackboardComponent->SetValueAsBool("IsDead", true);
+	AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
+	AIGhostBlackboardComponent->SetValueAsBool("IsScattering", false);
+	AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", false);
+	AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
+}
+
+void AGhostPawn::HandleDestruction()
+{
+	GetWorldTimerManager().ClearTimer(GhostFrightenedTimerHandle);
+	Dead();
+	GhostFloatingPawnMovement->MaxSpeed = MaxSpeed * 2;
+	//EndFrightenedMode();
 }
 
 void AGhostPawn::OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, FVector NormalImpulse, const FHitResult &Hit)
@@ -137,7 +171,7 @@ void AGhostPawn::StartPhaseFour()
 
 void AGhostPawn::StartFrightenedMode()
 {
-	//TODO:Settare velocità ridotta
+	GhostFloatingPawnMovement->MaxSpeed = MaxSpeedFrightened;
 	if (GetWorldTimerManager().IsTimerActive(GhostScatterPhaseTimerHandle))
 	{
 		GetWorldTimerManager().PauseTimer(GhostScatterPhaseTimerHandle);
@@ -149,10 +183,10 @@ void AGhostPawn::StartFrightenedMode()
 	}
 }
 
-void AGhostPawn::EndFrightenedMode(EGhostState GhostState)
+void AGhostPawn::EndFrightenedMode()
 {
-	//TODO:Settare velocità normale
-	switch (GhostState)
+	GhostFloatingPawnMovement->MaxSpeed = MaxSpeed;
+	switch (PreviousGhostState)
 	{
 	case EGhostState::Chase:
 		Chase();
