@@ -29,11 +29,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-protected:
-	EGhostState GhostState = EGhostState::Idle;
-
 public:
 	EGhostState GetGhostState() { return GhostState; }
+	int32 GetPoints() { return Points; }
 	void Chase();
 	void Scatter();
 	void Frightened();
@@ -41,6 +39,11 @@ public:
 	void Dead();
 	void HandleDestruction();
 	void RespawnGhost();
+
+protected:
+	UPROPERTY(EditAnywhere)
+	int32 Points = 100;
+	EGhostState GhostState = EGhostState::Idle;
 
 private:
 	UPROPERTY(EditAnywhere)

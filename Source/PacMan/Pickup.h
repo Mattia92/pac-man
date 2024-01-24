@@ -10,20 +10,14 @@ UCLASS()
 class PACMAN_API APickup : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	APickup();
+
+public:
+	int32 GetPoints() { return Points; }
+	void Consume();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	void Consume();
+	UPROPERTY(EditAnywhere)
+	int32 Points = 10;
 
 private:
 	UPROPERTY(EditAnywhere)

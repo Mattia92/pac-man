@@ -17,15 +17,31 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
 public:
 	float StartDelay = 3.f;
 
+protected:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> HUDWidgetClass;
+	UPROPERTY(VisibleInstanceOnly)
+	class UPacManHUDWidget *PacManHUDWidget;
+
 private:
+	UPROPERTY(EditAnywhere)
+	class USoundCue *GameplaySoundCue;
+	UPROPERTY(EditAnywhere)
+	class USoundCue *EndGameWinSoundCue;
+	UPROPERTY(EditAnywhere)
+	class USoundCue *EndGameLoseSoundCue;
+	class UAudioComponent *GameplayAudioComponent;
 	class APacManPlayerController *PacManPlayerController;
 	class ACameraActor *ViewTargetActor;
 	TArray<AActor *> Ghosts;
+	int32 CurrentScore = 0;
 	int32 RegularPickups = 0;
 
 	void HandleGameStart();
+	void IncreaseScore(int32 ScoreAmount);
 	int32 GetRegularPickupCount();
 };

@@ -5,8 +5,11 @@
 #include "Pickup.h"
 #include "PacManPawn.h"
 #include "GhostPawn.h"
+#include "PacManHUDWidget.h"
 #include "Camera/CameraActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundCue.h"
 
 // Called when the game starts or when spawned
 void APacManGameMode::BeginPlay()
@@ -33,6 +36,11 @@ void APacManGameMode::ActorEaten(AActor *EatenActor)
                 Ghost->Frightened();
             }
         }
+
+        if (PacManHUDWidget)
+        {
+            PacManHUDWidget->SetScore(CurrentScore += EatenPickup->GetPoints());
+        }
         
         if (RegularPickups == 0)
         {
@@ -57,8 +65,18 @@ void APacManGameMode::HandleGameStart()
     RegularPickups = GetRegularPickupCount();
 
     PacManPlayerController = Cast<APacManPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-    ViewTargetActor = Cast<ACameraActor>(UGameplayStatics::GetActorOfClass(this, ACameraActor::StaticClass()));
+    ViewTargetActor = Cast<ACameraActor>(UGameplayStatics::GetActorOfClass(this, ACameraActor::StaticClass())); 
     UGameplayStatics::GetAllActorsOfClass(this, AGhostPawn::StaticClass(), Ghosts);
+
+    if (IsValid(HUDWidgetClass))
+    {
+        PacManHUDWidget = Cast<UPacManHUDWidget>(CreateWidget(GetWorld(), HUDWidgetClass));
+        if (PacManHUDWidget)
+        {
+            PacManHUDWidget->AddToViewport();
+            PacManHUDWidget->SetUpAfterDelay(StartDelay);
+        }
+    }
 
     if (PacManPlayerController && ViewTargetActor)
     {
@@ -69,6 +87,12 @@ void APacManGameMode::HandleGameStart()
         FTimerDelegate PlayerEnabledTimerDelegate = FTimerDelegate::CreateUObject(PacManPlayerController, &APacManPlayerController::SetPlayerEnabledState, true);
         GetWorldTimerManager().SetTimer(PlayerEnabledTimerHandle, PlayerEnabledTimerDelegate, StartDelay, false);
     }
+
+    if (GameplaySoundCue)
+    {
+	    GameplayAudioComponent = UGameplayStatics::SpawnSound2D(this, GameplaySoundCue);
+    }
+    
     
 }
 
