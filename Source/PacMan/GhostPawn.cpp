@@ -6,6 +6,7 @@
 #include "WaveManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "Sound/SoundCue.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -97,8 +98,8 @@ void AGhostPawn::Frightened()
 	
 	if (WaveManager)
 	{		
-		StartFrightenedMode();
-		GetWorldTimerManager().SetTimer(GhostFrightenedTimerHandle, this, &AGhostPawn::EndFrightenedMode, WaveManager->FrightenedDuration, false);
+		EnableFrightenedMode();
+		GetWorldTimerManager().SetTimer(GhostFrightenedTimerHandle, this, &AGhostPawn::ResetGhost, WaveManager->FrightenedDuration, false);
 	}
 }
 
@@ -114,6 +115,7 @@ void AGhostPawn::Idle()
 
 void AGhostPawn::Dead()
 {
+	MeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
 	GhostState = EGhostState::Dead;
 	GhostDefaultMeshComponent->SetVisibility(false);
 	GhostVulnerableMeshComponent->SetVisibility(false);
@@ -129,8 +131,8 @@ void AGhostPawn::HandleDestruction()
 {
 	GetWorldTimerManager().ClearTimer(GhostFrightenedTimerHandle);
 	Dead();
+	UGameplayStatics::PlaySound2D(this, ComsumptionSoundCue);
 	GhostFloatingPawnMovement->MaxSpeed = MaxSpeed * 2;
-	//EndFrightenedMode();
 }
 
 void AGhostPawn::OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, FVector NormalImpulse, const FHitResult &Hit)
@@ -169,7 +171,14 @@ void AGhostPawn::StartPhaseFour()
 	GetWorldTimerManager().SetTimer(GhostScatterPhaseTimerHandle, this, &AGhostPawn::Chase, WaveManager->Wave4ScatterDuration, false);
 }
 
-void AGhostPawn::StartFrightenedMode()
+void AGhostPawn::RespawnGhost()
+{
+	MeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Block);
+	FTimerHandle GhostResetTimerHandle;
+    GetWorldTimerManager().SetTimer(GhostResetTimerHandle, this, &AGhostPawn::ResetGhost, ResetTime, false);
+}
+
+void AGhostPawn::EnableFrightenedMode()
 {
 	GhostFloatingPawnMovement->MaxSpeed = MaxSpeedFrightened;
 	if (GetWorldTimerManager().IsTimerActive(GhostScatterPhaseTimerHandle))
@@ -183,7 +192,7 @@ void AGhostPawn::StartFrightenedMode()
 	}
 }
 
-void AGhostPawn::EndFrightenedMode()
+void AGhostPawn::ResetGhost()
 {
 	GhostFloatingPawnMovement->MaxSpeed = MaxSpeed;
 	switch (PreviousGhostState)

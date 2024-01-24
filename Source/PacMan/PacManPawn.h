@@ -36,8 +36,20 @@ public:
 	void HandleDestruction();
 
 private:
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent *MeshComponent;
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent *PacManMeshComponent;
+	UPROPERTY(EditAnywhere)
+	class UFloatingPawnMovement *PacManFloatingPawnMovement;
+	UPROPERTY(EditAnywhere)
+	float MaxSpeed = 800.f;
+	UPROPERTY(EditAnywhere)
+	float Acceleration = 1600.f;
 	class APacManGameMode *PacManGameMode;
 
 	UFUNCTION()
 	void OnOverlapBegin(AActor *PlayerActor, AActor *OtherActor);
+	UFUNCTION()
+	void OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, FVector NormalImpulse, const FHitResult &Hit);
 };

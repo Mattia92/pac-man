@@ -5,12 +5,26 @@
 #include "PacManGameMode.h"
 #include "GhostPawn.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/FloatingPawnMovement.h"
 
 // Sets default values
 APacManPawn::APacManPawn()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
+	MeshComponent->SetCollisionProfileName(FName("PacMan"));
+	MeshComponent->SetEnableGravity(false);
+	MeshComponent->SetVisibility(false);
+	RootComponent = MeshComponent;
+	PacManMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PacMan Mesh Component"));
+	PacManMeshComponent->SetCollisionProfileName(FName("NoCollision"));
+	PacManMeshComponent->SetVisibility(true);
+	PacManMeshComponent->SetupAttachment(RootComponent);
+	PacManFloatingPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("PacMan Pawn Movement"));
+	PacManFloatingPawnMovement->MaxSpeed = MaxSpeed;
+	PacManFloatingPawnMovement->Acceleration = Acceleration;
 }
 
 // Called when the game starts or when spawned
@@ -19,6 +33,7 @@ void APacManPawn::BeginPlay()
 	Super::BeginPlay();
 
 	OnActorBeginOverlap.AddDynamic(this, &APacManPawn::OnOverlapBegin);
+	MeshComponent->OnComponentHit.AddDynamic(this, &APacManPawn::OnActorHit);
 	PacManGameMode = Cast<APacManGameMode>(UGameplayStatics::GetGameMode(this));
 }
 
@@ -74,12 +89,14 @@ void APacManPawn::OnOverlapBegin(AActor *PlayerActor, AActor *OtherActor)
 		{
 			PacManGameMode->ActorEaten(PickUp);
     	}
-    	else if (AGhostPawn *GhostPawn = Cast<AGhostPawn>(OtherActor))
-    	{
-			if (GhostPawn->GetGhostState() == EGhostState::Frightened)
-			{
-				PacManGameMode->ActorEaten(GhostPawn);
-			}
-    	}
+	}
+}
+
+void APacManPawn::OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, FVector NormalImpulse, const FHitResult &Hit)
+{
+	AGhostPawn* GhostPawn = Cast<AGhostPawn>(OtherActor);
+	if (PacManGameMode && GhostPawn && GhostPawn->GetGhostState() == EGhostState::Frightened)
+	{
+		PacManGameMode->ActorEaten(OtherActor);
 	}
 }

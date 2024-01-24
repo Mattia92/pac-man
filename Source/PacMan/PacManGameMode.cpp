@@ -36,12 +36,14 @@ void APacManGameMode::ActorEaten(AActor *EatenActor)
         
         if (RegularPickups == 0)
         {
+            //SET WIN
             UE_LOG(LogTemp, Display, TEXT("EATEN ALL!!!"));
         }
     }
     else if (APacManPawn *PacManPawn = Cast<APacManPawn>(EatenActor))
     {
         PacManPawn->HandleDestruction();
+        //RESET ALL
     }
     else if (AGhostPawn *GhostPawn = Cast<AGhostPawn>(EatenActor))
     {

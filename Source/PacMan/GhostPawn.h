@@ -40,6 +40,7 @@ public:
 	void Idle();
 	void Dead();
 	void HandleDestruction();
+	void RespawnGhost();
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -55,11 +56,15 @@ private:
 	UPROPERTY(EditAnywhere)
 	class AWaveManager *WaveManager;
 	UPROPERTY(EditAnywhere)
+	class USoundCue *ComsumptionSoundCue;
+	UPROPERTY(EditAnywhere)
 	float MaxSpeed = 500.f;
 	UPROPERTY(EditAnywhere)
 	float MaxSpeedFrightened = 250.f;
 	UPROPERTY(EditAnywhere)
 	float Acceleration = 4000.f;
+	UPROPERTY(EditAnywhere)
+	float ResetTime = 5.f;
 
 	class APacManPawn *PacManPawn;
 	class AAIController *AIGhostController;
@@ -76,6 +81,6 @@ private:
 	void StartPhaseTwo();
 	void StartPhaseThree();
 	void StartPhaseFour();
-	void StartFrightenedMode();
-	void EndFrightenedMode();
+	void ResetGhost();
+	void EnableFrightenedMode();
 };
