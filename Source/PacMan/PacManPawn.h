@@ -28,11 +28,13 @@ public:
 
 protected:
 	bool Frozen = true;
+	int32 Lives = 1;
 
 public:
 	void SetDirection(const FVector Direction);
 	bool IsFrozen() { return Frozen; }
 	void SetFrozen(bool Value) { Frozen = Value; }
+	int32 GetLives() { return Lives; }
 	void HandleDestruction();
 
 private:

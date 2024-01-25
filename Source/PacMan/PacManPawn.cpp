@@ -25,6 +25,8 @@ APacManPawn::APacManPawn()
 	PacManFloatingPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("PacMan Pawn Movement"));
 	PacManFloatingPawnMovement->MaxSpeed = MaxSpeed;
 	PacManFloatingPawnMovement->Acceleration = Acceleration;
+	PacManFloatingPawnMovement->SetPlaneConstraintEnabled(true);
+	PacManFloatingPawnMovement->SetPlaneConstraintAxisSetting(EPlaneConstraintAxisSetting::Z);
 }
 
 // Called when the game starts or when spawned
@@ -79,6 +81,7 @@ void APacManPawn::HandleDestruction()
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 	SetActorTickEnabled(false);
+	Lives--;
 }
 
 void APacManPawn::OnOverlapBegin(AActor *PlayerActor, AActor *OtherActor)

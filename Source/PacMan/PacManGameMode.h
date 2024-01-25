@@ -24,8 +24,12 @@ public:
 protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> HUDWidgetClass;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> EndGameWidgetClass;
 	UPROPERTY(VisibleInstanceOnly)
 	class UPacManHUDWidget *PacManHUDWidget;
+	UPROPERTY(VisibleInstanceOnly)
+	class UPacManEndGameWidget *PacManEndGameWidget;
 
 private:
 	UPROPERTY(EditAnywhere)

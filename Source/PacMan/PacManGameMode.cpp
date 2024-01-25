@@ -6,6 +6,7 @@
 #include "PacManPawn.h"
 #include "GhostPawn.h"
 #include "PacManHUDWidget.h"
+#include "PacManEndGameWidget.h"
 #include "Camera/CameraActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/AudioComponent.h"
@@ -42,16 +43,27 @@ void APacManGameMode::ActorEaten(AActor *EatenActor)
             PacManHUDWidget->SetScore(CurrentScore += EatenPickup->GetPoints());
         }
         
-        if (RegularPickups == 0)
+        if (EndGameWidgetClass && RegularPickups == 0)
         {
-            //SET WIN
-            UE_LOG(LogTemp, Display, TEXT("EATEN ALL!!!"));
+            GameplayAudioComponent->SetSound(EndGameWinSoundCue);
+            PacManEndGameWidget->AddToViewport();
+            PacManEndGameWidget->GameOver(true);
         }
     }
     else if (APacManPawn *PacManPawn = Cast<APacManPawn>(EatenActor))
     {
         PacManPawn->HandleDestruction();
-        //RESET ALL
+        if (EndGameWidgetClass && PacManPawn->GetLives() <= 0)
+        {
+            GameplayAudioComponent->SetSound(EndGameLoseSoundCue);
+            PacManEndGameWidget->AddToViewport();
+            PacManEndGameWidget->GameOver(false);
+        }
+        else
+        {
+            //RESET ALL
+        }
+        
     }
     else if (AGhostPawn *GhostPawn = Cast<AGhostPawn>(EatenActor))
     {
@@ -76,6 +88,11 @@ void APacManGameMode::HandleGameStart()
             PacManHUDWidget->AddToViewport();
             PacManHUDWidget->SetUpAfterDelay(StartDelay);
         }
+    }
+
+    if (IsValid(EndGameWidgetClass))
+    {
+        PacManEndGameWidget = Cast<UPacManEndGameWidget>(CreateWidget(GetWorld(), EndGameWidgetClass));
     }
 
     if (PacManPlayerController && ViewTargetActor)
