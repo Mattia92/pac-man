@@ -18,6 +18,7 @@ protected:
 	void SetupInputComponent() override;
 
 public:
+	class APacManPawn* GetPacManPawn() { return PacManPawn; }
 	void SetPlayerEnabledState(bool bPlayerEnabled);
 	void MoveUp();
 	void MoveDown();

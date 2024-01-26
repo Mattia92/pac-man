@@ -6,6 +6,7 @@
 #include "GhostPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 APacManPawn::APacManPawn()
@@ -102,4 +103,16 @@ void APacManPawn::OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, U
 	{
 		PacManGameMode->ActorEaten(OtherActor);
 	}
+}
+
+void APacManPawn::SpawnEmitterForDuration(float TimeDuration)
+{
+	FTimerHandle PowerUpParticleSystemTimerHandle;
+	PowerUpParticleSystemComponent = UGameplayStatics::SpawnEmitterAttached(PowerUpParticleSystem, GetRootComponent());
+    GetWorldTimerManager().SetTimer(PowerUpParticleSystemTimerHandle, this, &APacManPawn::DestroyEmitter, TimeDuration, false);
+}
+
+void APacManPawn::DestroyEmitter()
+{
+	PowerUpParticleSystemComponent->DeactivateSystem();
 }

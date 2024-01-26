@@ -36,6 +36,7 @@ public:
 	void SetFrozen(bool Value) { Frozen = Value; }
 	int32 GetLives() { return Lives; }
 	void HandleDestruction();
+	void SpawnEmitterForDuration(float TimeDuration);
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -45,13 +46,17 @@ private:
 	UPROPERTY(EditAnywhere)
 	class UFloatingPawnMovement *PacManFloatingPawnMovement;
 	UPROPERTY(EditAnywhere)
+	class UParticleSystem *PowerUpParticleSystem;
+	UPROPERTY(EditAnywhere)
 	float MaxSpeed = 800.f;
 	UPROPERTY(EditAnywhere)
 	float Acceleration = 1600.f;
 	class APacManGameMode *PacManGameMode;
+	class UParticleSystemComponent *PowerUpParticleSystemComponent;
 
 	UFUNCTION()
 	void OnOverlapBegin(AActor *PlayerActor, AActor *OtherActor);
 	UFUNCTION()
 	void OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, FVector NormalImpulse, const FHitResult &Hit);
+	void DestroyEmitter();
 };

@@ -41,11 +41,13 @@ private:
 	class UAudioComponent *GameplayAudioComponent;
 	class APacManPlayerController *PacManPlayerController;
 	class ACameraActor *ViewTargetActor;
+	class AWaveManager *WaveManager;
 	TArray<AActor *> Ghosts;
 	int32 CurrentScore = 0;
 	int32 RegularPickups = 0;
 
 	void HandleGameStart();
 	void IncreaseScore(int32 ScoreAmount);
+	void DeactivateEmitter();
 	int32 GetRegularPickupCount();
 };

@@ -7,6 +7,7 @@
 #include "GhostPawn.h"
 #include "PacManHUDWidget.h"
 #include "PacManEndGameWidget.h"
+#include "WaveManager.h"
 #include "Camera/CameraActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/AudioComponent.h"
@@ -31,6 +32,11 @@ void APacManGameMode::ActorEaten(AActor *EatenActor)
         }
         else if (EatenPickup->ActorHasTag("PowerUp"))
         {
+            if(PacManPlayerController && PacManPlayerController->GetPacManPawn() && WaveManager)
+            {
+                PacManPlayerController->GetPacManPawn()->SpawnEmitterForDuration(WaveManager->FrightenedDuration);
+            }
+
             for(AActor* Actor : Ghosts)
             {
                 AGhostPawn* Ghost = Cast<AGhostPawn>(Actor);
@@ -72,7 +78,8 @@ void APacManGameMode::HandleGameStart()
     RegularPickups = GetRegularPickupCount();
 
     PacManPlayerController = Cast<APacManPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-    ViewTargetActor = Cast<ACameraActor>(UGameplayStatics::GetActorOfClass(this, ACameraActor::StaticClass())); 
+    ViewTargetActor = Cast<ACameraActor>(UGameplayStatics::GetActorOfClass(this, ACameraActor::StaticClass()));
+    WaveManager = Cast<AWaveManager>(UGameplayStatics::GetActorOfClass(this, AWaveManager::StaticClass()));
     UGameplayStatics::GetAllActorsOfClass(this, AGhostPawn::StaticClass(), Ghosts);
 
     if (IsValid(HUDWidgetClass))
