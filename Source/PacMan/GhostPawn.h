@@ -57,6 +57,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	class UFloatingPawnMovement *GhostFloatingPawnMovement;
 	UPROPERTY(EditAnywhere)
+	class UBehaviorTree *GhostBehaviorTree;
+	UPROPERTY(EditAnywhere)
 	class AWaveManager *WaveManager;
 	UPROPERTY(EditAnywhere)
 	class USoundCue *ComsumptionSoundCue;

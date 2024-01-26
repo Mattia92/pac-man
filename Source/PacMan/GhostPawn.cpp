@@ -46,8 +46,18 @@ void AGhostPawn::BeginPlay()
 	MeshComponent->OnComponentHit.AddDynamic(this, &AGhostPawn::OnActorHit);
 	PacManPawn = Cast<APacManPawn>(UGameplayStatics::GetPlayerPawn(this, 0));
 	AIGhostController = Cast<AAIController>(GetController());
-	AIGhostBlackboardComponent = AIGhostController->GetBlackboardComponent();
 	PacManGameMode = Cast<APacManGameMode>(UGameplayStatics::GetGameMode(this));
+
+	if (AIGhostController && GhostBehaviorTree)
+	{
+		AIGhostController->RunBehaviorTree(GhostBehaviorTree);
+		AIGhostBlackboardComponent = AIGhostController->GetBlackboardComponent();
+		if (AIGhostBlackboardComponent)
+		{
+			AIGhostBlackboardComponent->SetValueAsBool("IsPathLooping", true);
+		}
+	}
+
 	Idle();
 
 	if (PacManGameMode && WaveManager)
@@ -63,11 +73,15 @@ void AGhostPawn::Chase()
 	GhostDefaultMeshComponent->SetVisibility(true);
 	GhostVulnerableMeshComponent->SetVisibility(false);
 	GhostDeadMeshComponent->SetVisibility(false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsChasing", true);
-	AIGhostBlackboardComponent->SetValueAsBool("IsScattering", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsDead", false);
+
+	if (AIGhostBlackboardComponent)
+	{
+		AIGhostBlackboardComponent->SetValueAsBool("IsChasing", true);
+		AIGhostBlackboardComponent->SetValueAsBool("IsScattering", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsDead", false);
+	}
 }
 
 void AGhostPawn::Scatter()
@@ -76,11 +90,15 @@ void AGhostPawn::Scatter()
 	GhostDefaultMeshComponent->SetVisibility(true);
 	GhostVulnerableMeshComponent->SetVisibility(false);
 	GhostDeadMeshComponent->SetVisibility(false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsScattering", true);
-	AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsDead", false);
+
+	if (AIGhostBlackboardComponent)
+	{	
+		AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsScattering", true);
+		AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsDead", false);
+	}
 }
 
 void AGhostPawn::Frightened()
@@ -90,11 +108,15 @@ void AGhostPawn::Frightened()
 	GhostDefaultMeshComponent->SetVisibility(false);
 	GhostVulnerableMeshComponent->SetVisibility(true);
 	GhostDeadMeshComponent->SetVisibility(false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsScattering", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", true);
-	AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsDead", false);
+
+	if (AIGhostBlackboardComponent)
+	{	
+		AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsScattering", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", true);
+		AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsDead", false);
+	}
 	
 	if (WaveManager)
 	{		
@@ -106,11 +128,15 @@ void AGhostPawn::Frightened()
 void AGhostPawn::Idle()
 {
 	GhostState = EGhostState::Idle;
-	AIGhostBlackboardComponent->SetValueAsBool("IsIdle", true);
-	AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsScattering", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsDead", false);
+
+	if (AIGhostBlackboardComponent)
+	{
+		AIGhostBlackboardComponent->SetValueAsBool("IsIdle", true);
+		AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsScattering", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsDead", false);
+	}
 }
 
 void AGhostPawn::Dead()
@@ -120,11 +146,15 @@ void AGhostPawn::Dead()
 	GhostDefaultMeshComponent->SetVisibility(false);
 	GhostVulnerableMeshComponent->SetVisibility(false);
 	GhostDeadMeshComponent->SetVisibility(true);
-	AIGhostBlackboardComponent->SetValueAsBool("IsDead", true);
-	AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsScattering", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", false);
-	AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
+
+	if (AIGhostBlackboardComponent)
+	{	
+		AIGhostBlackboardComponent->SetValueAsBool("IsDead", true);
+		AIGhostBlackboardComponent->SetValueAsBool("IsChasing", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsScattering", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsFrightened", false);
+		AIGhostBlackboardComponent->SetValueAsBool("IsIdle", false);
+	}
 }
 
 void AGhostPawn::HandleDestruction()
