@@ -59,11 +59,6 @@ void APacManGameMode::ActorEaten(AActor *EatenActor)
             PacManEndGameWidget->AddToViewport();
             PacManEndGameWidget->GameOver(false);
         }
-        else
-        {
-            //RESET ALL
-        }
-        
     }
     else if (AGhostPawn *GhostPawn = Cast<AGhostPawn>(EatenActor))
     {
