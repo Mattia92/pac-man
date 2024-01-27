@@ -20,6 +20,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateText(const FString& UpdatedText);
 	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateLives(const int RemainingLives);
+	UFUNCTION(BlueprintImplementableEvent)
 	void SetUpAfterDelay(const float Delay);
 
 	void SetScore(int32 Score);

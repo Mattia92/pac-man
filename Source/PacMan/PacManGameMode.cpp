@@ -58,12 +58,33 @@ void APacManGameMode::ActorEaten(AActor *EatenActor)
     }
     else if (APacManPawn *PacManPawn = Cast<APacManPawn>(EatenActor))
     {
-        PacManPawn->HandleDestruction();
+        if (PacManPlayerController)
+        {
+            PacManPawn->HandleDestruction();
+            PacManPlayerController->ResetLocationAndRotation();
+        }
+
+        if (PacManHUDWidget)
+        {
+            PacManHUDWidget->UpdateLives(PacManPawn->GetLives());
+        }
+
         if (EndGameWidgetClass && PacManPawn->GetLives() <= 0)
         {
             GameplayAudioComponent->SetSound(EndGameLoseSoundCue);
             PacManEndGameWidget->AddToViewport();
             PacManEndGameWidget->GameOver(false);
+        }
+        else
+        {
+            //RESET
+            for(AActor* Actor : Ghosts)
+            {
+                AGhostPawn* Ghost = Cast<AGhostPawn>(Actor);
+                Ghost->Idle();
+                Ghost->ResetGhostAndPhases();
+            }
+            HandleGameStart();
         }
     }
     else if (AGhostPawn *GhostPawn = Cast<AGhostPawn>(EatenActor))
@@ -84,15 +105,22 @@ void APacManGameMode::HandleGameStart()
 
     if (IsValid(HUDWidgetClass))
     {
-        PacManHUDWidget = Cast<UPacManHUDWidget>(CreateWidget(GetWorld(), HUDWidgetClass));
+        if (!PacManHUDWidget)
+        {
+            PacManHUDWidget = Cast<UPacManHUDWidget>(CreateWidget(GetWorld(), HUDWidgetClass));
+        }
+
         if (PacManHUDWidget)
         {
-            PacManHUDWidget->AddToViewport();
+            if (!PacManHUDWidget->IsInViewport())
+            {
+                PacManHUDWidget->AddToViewport();
+            }
             PacManHUDWidget->SetUpAfterDelay(StartDelay);
         }
     }
 
-    if (IsValid(EndGameWidgetClass))
+    if (IsValid(EndGameWidgetClass) && !PacManEndGameWidget)
     {
         PacManEndGameWidget = Cast<UPacManEndGameWidget>(CreateWidget(GetWorld(), EndGameWidgetClass));
     }
@@ -107,7 +135,7 @@ void APacManGameMode::HandleGameStart()
         GetWorldTimerManager().SetTimer(PlayerEnabledTimerHandle, PlayerEnabledTimerDelegate, StartDelay, false);
     }
 
-    if (GameplaySoundCue)
+    if (GameplaySoundCue && !GameplayAudioComponent)
     {
 	    GameplayAudioComponent = UGameplayStatics::SpawnSound2D(this, GameplaySoundCue);
     }

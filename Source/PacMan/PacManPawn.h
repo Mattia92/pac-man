@@ -28,7 +28,7 @@ public:
 
 protected:
 	bool Frozen = true;
-	int32 Lives = 1;
+	int32 Lives = 3;
 
 public:
 	void SetDirection(const FVector Direction);

@@ -39,6 +39,7 @@ public:
 	void Dead();
 	void HandleDestruction();
 	void RespawnGhost();
+	void ResetGhostAndPhases();
 
 protected:
 	UPROPERTY(EditAnywhere)
@@ -79,6 +80,7 @@ private:
 	FTimerHandle GhostChasePhaseTimerHandle;
 	FTimerHandle GhostFrightenedTimerHandle;
 	EGhostState PreviousGhostState;
+	FVector StartLocation;
 
 	UFUNCTION()
 	void OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, FVector NormalImpulse, const FHitResult &Hit);

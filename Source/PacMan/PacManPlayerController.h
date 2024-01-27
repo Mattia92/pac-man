@@ -20,6 +20,7 @@ protected:
 public:
 	class APacManPawn* GetPacManPawn() { return PacManPawn; }
 	void SetPlayerEnabledState(bool bPlayerEnabled);
+	void ResetLocationAndRotation();
 	void MoveUp();
 	void MoveDown();
 	void MoveLeft();
@@ -27,4 +28,6 @@ public:
 
 private:
 	class APacManPawn *PacManPawn;
+	FVector StartLocation;
+	FRotator StartRotation;
 };

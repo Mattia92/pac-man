@@ -79,9 +79,9 @@ void APacManPawn::SetDirection(const FVector Direction)
 
 void APacManPawn::HandleDestruction()
 {
-	SetActorHiddenInGame(true);
-	SetActorEnableCollision(false);
-	SetActorTickEnabled(false);
+	//SetActorHiddenInGame(true);
+	//SetActorEnableCollision(false);
+	//SetActorTickEnabled(false);
 	Lives--;
 }
 

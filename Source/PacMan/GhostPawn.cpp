@@ -47,6 +47,7 @@ void AGhostPawn::BeginPlay()
 	PacManPawn = Cast<APacManPawn>(UGameplayStatics::GetPlayerPawn(this, 0));
 	AIGhostController = Cast<AAIController>(GetController());
 	PacManGameMode = Cast<APacManGameMode>(UGameplayStatics::GetGameMode(this));
+	StartLocation = GetActorLocation();
 
 	if (AIGhostController && GhostBehaviorTree)
 	{
@@ -206,6 +207,22 @@ void AGhostPawn::RespawnGhost()
 	MeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Block);
 	FTimerHandle GhostResetTimerHandle;
     GetWorldTimerManager().SetTimer(GhostResetTimerHandle, this, &AGhostPawn::ResetGhost, ResetTime, false);
+}
+
+void AGhostPawn::ResetGhostAndPhases()
+{
+	GhostState = EGhostState::Idle;
+	GhostDefaultMeshComponent->SetVisibility(true);
+	GhostVulnerableMeshComponent->SetVisibility(false);
+	GhostDeadMeshComponent->SetVisibility(false);
+	SetActorLocation(StartLocation);
+
+	if (PacManGameMode && WaveManager)
+	{
+		FTimerHandle GhostEnabledTimerHandle;
+        GetWorldTimerManager().SetTimer(GhostEnabledTimerHandle, this, &AGhostPawn::StartPhaseOne, PacManGameMode->StartDelay, false);
+	}
+
 }
 
 void AGhostPawn::EnableFrightenedMode()

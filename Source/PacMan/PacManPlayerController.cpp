@@ -10,6 +10,12 @@ void APacManPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	PacManPawn = Cast<APacManPawn>(GetPawn());
+    if (PacManPawn)
+    {
+        StartLocation = PacManPawn->GetActorLocation();
+        StartRotation = PacManPawn->GetActorRotation();
+    }
+    
 }
 
 void APacManPlayerController::SetPlayerEnabledState(bool bPlayerEnabled)
@@ -24,7 +30,16 @@ void APacManPlayerController::SetPlayerEnabledState(bool bPlayerEnabled)
         {
             PacManPawn->DisableInput(this);
         }
+        SetIgnoreMoveInput(!bPlayerEnabled);
         PacManPawn->SetFrozen(!bPlayerEnabled);
+    }
+}
+
+void APacManPlayerController::ResetLocationAndRotation()
+{
+    if (PacManPawn)
+    {
+        PacManPawn->SetActorLocationAndRotation(StartLocation, StartRotation);
     }
 }
 
