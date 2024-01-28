@@ -14,11 +14,13 @@ APacManPawn::APacManPawn()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	OnActorBeginOverlap.AddDynamic(this, &APacManPawn::OnOverlapBegin);
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	MeshComponent->SetCollisionProfileName(FName("PacMan"));
 	MeshComponent->SetEnableGravity(false);
 	MeshComponent->SetVisibility(false);
 	RootComponent = MeshComponent;
+	MeshComponent->OnComponentHit.AddDynamic(this, &APacManPawn::OnActorHit);
 	PacManMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PacMan Mesh Component"));
 	PacManMeshComponent->SetCollisionProfileName(FName("NoCollision"));
 	PacManMeshComponent->SetVisibility(true);
@@ -35,8 +37,6 @@ void APacManPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OnActorBeginOverlap.AddDynamic(this, &APacManPawn::OnOverlapBegin);
-	MeshComponent->OnComponentHit.AddDynamic(this, &APacManPawn::OnActorHit);
 	PacManGameMode = Cast<APacManGameMode>(UGameplayStatics::GetGameMode(this));
 }
 

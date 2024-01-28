@@ -11,15 +11,14 @@ class PACMAN_API APacManGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
-public:
-	void ActorEaten(AActor *EatenActor);
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
 	float StartDelay = 3.f;
+
+	void ActorEaten(AActor *EatenActor);
 
 protected:
 	UPROPERTY(EditAnywhere)
@@ -40,7 +39,9 @@ private:
 	class USoundCue *EndGameLoseSoundCue;
 	UPROPERTY(EditAnywhere)
 	class USoundCue *DeathSoundCue;
+	UPROPERTY(VisibleInstanceOnly)
 	class UAudioComponent *GameplayAudioComponent;
+	UPROPERTY(VisibleInstanceOnly)
 	class UAudioComponent *DeathAudioComponent;
 	class APacManPlayerController *PacManPlayerController;
 	class ACameraActor *ViewTargetActor;

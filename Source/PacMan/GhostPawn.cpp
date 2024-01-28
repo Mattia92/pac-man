@@ -21,6 +21,7 @@ AGhostPawn::AGhostPawn()
 	MeshComponent->SetEnableGravity(false);
 	MeshComponent->SetVisibility(false);
 	RootComponent = MeshComponent;
+	MeshComponent->OnComponentHit.AddDynamic(this, &AGhostPawn::OnActorHit);
 	GhostDefaultMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Ghost Default Mesh Component"));
 	GhostDefaultMeshComponent->SetCollisionProfileName(FName("NoCollision"));
 	GhostDefaultMeshComponent->SetVisibility(true);
@@ -43,7 +44,6 @@ void AGhostPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MeshComponent->OnComponentHit.AddDynamic(this, &AGhostPawn::OnActorHit);
 	PacManPawn = Cast<APacManPawn>(UGameplayStatics::GetPlayerPawn(this, 0));
 	AIGhostController = Cast<AAIController>(GetController());
 	PacManGameMode = Cast<APacManGameMode>(UGameplayStatics::GetGameMode(this));
@@ -122,6 +122,10 @@ void AGhostPawn::Frightened()
 	if (WaveManager)
 	{		
 		EnableFrightenedMode();
+		if (GetWorldTimerManager().IsTimerActive(GhostFrightenedTimerHandle))
+		{
+			GetWorldTimerManager().ClearTimer(GhostFrightenedTimerHandle);
+		}
 		GetWorldTimerManager().SetTimer(GhostFrightenedTimerHandle, this, &AGhostPawn::ResetGhost, WaveManager->FrightenedDuration, false);
 	}
 }
@@ -129,6 +133,7 @@ void AGhostPawn::Frightened()
 void AGhostPawn::Idle()
 {
 	GhostState = EGhostState::Idle;
+	MeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Block);
 	PauseAllTimers();
 
 	if (AIGhostBlackboardComponent)

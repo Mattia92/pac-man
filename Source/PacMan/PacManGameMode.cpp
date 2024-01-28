@@ -10,6 +10,7 @@
 #include "WaveManager.h"
 #include "Camera/CameraActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Math/UnrealMathUtility.h"
 #include "Components/AudioComponent.h"
 #include "Sound/SoundCue.h"
 
@@ -18,6 +19,16 @@ void APacManGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
+    if (DeathSoundCue && !DeathAudioComponent)
+    {
+        DeathAudioComponent = UGameplayStatics::SpawnSound2D(this, DeathSoundCue);
+        DeathAudioComponent->bAutoDestroy = false;
+        if (DeathAudioComponent)
+        {
+            DeathAudioComponent->Stop();
+            DeathAudioComponent->OnAudioFinished.AddDynamic(this, &APacManGameMode::HandleGameReset);
+        }
+    }
     HandleGameStart();
 }
 
@@ -75,6 +86,8 @@ void APacManGameMode::ActorEaten(AActor *EatenActor)
         if (PacManHUDWidget)
         {
             PacManHUDWidget->UpdateLives(PacManPlayerController->GetPacManPawn()->GetLives());
+            CurrentScore = FMath::DivideAndRoundNearest(CurrentScore, 2);
+            PacManHUDWidget->SetScore(CurrentScore);
         }
 
         if (EndGameWidgetClass && PacManPlayerController->GetPacManPawn()->GetLives() <= 0)
@@ -142,16 +155,6 @@ void APacManGameMode::HandleGameStart()
     if (GameplaySoundCue && !GameplayAudioComponent)
     {
         GameplayAudioComponent = UGameplayStatics::SpawnSound2D(this, GameplaySoundCue);
-    }
-
-    if (DeathSoundCue && !DeathAudioComponent)
-    {
-        DeathAudioComponent = UGameplayStatics::SpawnSound2D(this, DeathSoundCue);
-        DeathAudioComponent->Stop();
-        if (DeathAudioComponent)
-        {
-            DeathAudioComponent->OnAudioFinished.AddDynamic(this, &APacManGameMode::HandleGameReset);
-        }
     }
 }
 
