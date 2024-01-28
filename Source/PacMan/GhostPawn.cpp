@@ -129,6 +129,7 @@ void AGhostPawn::Frightened()
 void AGhostPawn::Idle()
 {
 	GhostState = EGhostState::Idle;
+	PausePhaseTimers();
 
 	if (AIGhostBlackboardComponent)
 	{
@@ -215,6 +216,7 @@ void AGhostPawn::ResetGhostAndPhases()
 	GhostDefaultMeshComponent->SetVisibility(true);
 	GhostVulnerableMeshComponent->SetVisibility(false);
 	GhostDeadMeshComponent->SetVisibility(false);
+	GhostFloatingPawnMovement->MaxSpeed = MaxSpeed;
 	SetActorLocation(StartLocation);
 
 	if (PacManGameMode && WaveManager)
@@ -228,15 +230,7 @@ void AGhostPawn::ResetGhostAndPhases()
 void AGhostPawn::EnableFrightenedMode()
 {
 	GhostFloatingPawnMovement->MaxSpeed = MaxSpeedFrightened;
-	if (GetWorldTimerManager().IsTimerActive(GhostScatterPhaseTimerHandle))
-	{
-		GetWorldTimerManager().PauseTimer(GhostScatterPhaseTimerHandle);
-	}
-
-	if (GetWorldTimerManager().IsTimerActive(GhostChasePhaseTimerHandle))
-	{
-		GetWorldTimerManager().PauseTimer(GhostChasePhaseTimerHandle);
-	}
+	PausePhaseTimers();
 }
 
 void AGhostPawn::ResetGhost()
@@ -253,7 +247,24 @@ void AGhostPawn::ResetGhost()
 	default:
 		break;
 	}
+	UnPausePhaseTimers();
+}
 
+void AGhostPawn::PausePhaseTimers()
+{
+	if (GetWorldTimerManager().IsTimerActive(GhostScatterPhaseTimerHandle))
+	{
+		GetWorldTimerManager().PauseTimer(GhostScatterPhaseTimerHandle);
+	}
+
+	if (GetWorldTimerManager().IsTimerActive(GhostChasePhaseTimerHandle))
+	{
+		GetWorldTimerManager().PauseTimer(GhostChasePhaseTimerHandle);
+	}
+}
+
+void AGhostPawn::UnPausePhaseTimers()
+{
 	if (GetWorldTimerManager().IsTimerPaused(GhostScatterPhaseTimerHandle))
 	{
 		GetWorldTimerManager().UnPauseTimer(GhostScatterPhaseTimerHandle);

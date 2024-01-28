@@ -28,12 +28,15 @@ public:
 
 protected:
 	bool Frozen = true;
+	float MovementScale = 1.f;
 	int32 Lives = 3;
 
 public:
 	void SetDirection(const FVector Direction);
 	bool IsFrozen() { return Frozen; }
 	void SetFrozen(bool Value) { Frozen = Value; }
+	float GetMovementScale() { return MovementScale; }
+	void SetMovementScale(float Value) { MovementScale = Value; }
 	int32 GetLives() { return Lives; }
 	void HandleDestruction();
 	void SpawnEmitterForDuration(float TimeDuration);

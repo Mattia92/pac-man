@@ -47,7 +47,7 @@ void APacManPawn::Tick(float DeltaTime)
 
 	if (!Frozen)
 	{
-		AddMovementInput(GetActorForwardVector());
+		AddMovementInput(GetActorForwardVector(), MovementScale);
 	}
 }
 
@@ -79,9 +79,9 @@ void APacManPawn::SetDirection(const FVector Direction)
 
 void APacManPawn::HandleDestruction()
 {
-	//SetActorHiddenInGame(true);
-	//SetActorEnableCollision(false);
-	//SetActorTickEnabled(false);
+	SetActorEnableCollision(false);
+	MovementScale = 0;
+	Frozen = true;
 	Lives--;
 }
 

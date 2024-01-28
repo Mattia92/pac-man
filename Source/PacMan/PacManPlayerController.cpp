@@ -3,6 +3,7 @@
 
 #include "PacManPlayerController.h"
 #include "PacManPawn.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Called when the game starts or when spawned
 void APacManPlayerController::BeginPlay()
@@ -32,6 +33,7 @@ void APacManPlayerController::SetPlayerEnabledState(bool bPlayerEnabled)
         }
         SetIgnoreMoveInput(!bPlayerEnabled);
         PacManPawn->SetFrozen(!bPlayerEnabled);
+        PacManPawn->SetMovementScale(UKismetMathLibrary::Conv_BoolToFloat(bPlayerEnabled));
     }
 }
 
@@ -40,6 +42,7 @@ void APacManPlayerController::ResetLocationAndRotation()
     if (PacManPawn)
     {
         PacManPawn->SetActorLocationAndRotation(StartLocation, StartRotation);
+        PacManPawn->SetActorEnableCollision(true);
     }
 }
 
@@ -55,7 +58,7 @@ void APacManPlayerController::SetupInputComponent()
 
 void APacManPlayerController::MoveUp()
 {
-    if (PacManPawn)
+    if (PacManPawn && !PacManPawn->IsFrozen())
     {
         PacManPawn->SetDirection(FVector::UpVector);
     }
@@ -63,7 +66,7 @@ void APacManPlayerController::MoveUp()
 
 void APacManPlayerController::MoveDown()
 {
-    if (PacManPawn)
+    if (PacManPawn && !PacManPawn->IsFrozen())
     {
         PacManPawn->SetDirection(FVector::DownVector);
     }
@@ -71,7 +74,7 @@ void APacManPlayerController::MoveDown()
 
 void APacManPlayerController::MoveLeft()
 {
-    if (PacManPawn)
+    if (PacManPawn && !PacManPawn->IsFrozen())
     {
         PacManPawn->SetDirection(FVector::LeftVector);
     }
@@ -79,7 +82,7 @@ void APacManPlayerController::MoveLeft()
 
 void APacManPlayerController::MoveRight()
 {
-    if (PacManPawn)
+    if (PacManPawn && !PacManPawn->IsFrozen())
     {
         PacManPawn->SetDirection(FVector::RightVector);
     }

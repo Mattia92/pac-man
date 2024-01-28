@@ -38,7 +38,10 @@ private:
 	class USoundCue *EndGameWinSoundCue;
 	UPROPERTY(EditAnywhere)
 	class USoundCue *EndGameLoseSoundCue;
+	UPROPERTY(EditAnywhere)
+	class USoundCue *DeathSoundCue;
 	class UAudioComponent *GameplayAudioComponent;
+	class UAudioComponent *DeathAudioComponent;
 	class APacManPlayerController *PacManPlayerController;
 	class ACameraActor *ViewTargetActor;
 	class AWaveManager *WaveManager;
@@ -46,6 +49,8 @@ private:
 	int32 CurrentScore = 0;
 	int32 RegularPickups = 0;
 
+	UFUNCTION()
+	void HandleGameEnd();
 	void HandleGameStart();
 	void IncreaseScore(int32 ScoreAmount);
 	void DeactivateEmitter();

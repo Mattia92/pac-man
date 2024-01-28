@@ -90,4 +90,6 @@ private:
 	void StartPhaseFour();
 	void ResetGhost();
 	void EnableFrightenedMode();
+	void PausePhaseTimers();
+	void UnPausePhaseTimers();
 };

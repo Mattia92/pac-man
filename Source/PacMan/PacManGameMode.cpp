@@ -32,14 +32,14 @@ void APacManGameMode::ActorEaten(AActor *EatenActor)
         }
         else if (EatenPickup->ActorHasTag("PowerUp"))
         {
-            if(PacManPlayerController && PacManPlayerController->GetPacManPawn() && WaveManager)
+            if (PacManPlayerController && PacManPlayerController->GetPacManPawn() && WaveManager)
             {
                 PacManPlayerController->GetPacManPawn()->SpawnEmitterForDuration(WaveManager->FrightenedDuration);
             }
 
-            for(AActor* Actor : Ghosts)
+            for (AActor *Actor : Ghosts)
             {
-                AGhostPawn* Ghost = Cast<AGhostPawn>(Actor);
+                AGhostPawn *Ghost = Cast<AGhostPawn>(Actor);
                 Ghost->Frightened();
             }
         }
@@ -48,7 +48,7 @@ void APacManGameMode::ActorEaten(AActor *EatenActor)
         {
             PacManHUDWidget->SetScore(CurrentScore += EatenPickup->GetPoints());
         }
-        
+
         if (EndGameWidgetClass && RegularPickups == 0)
         {
             GameplayAudioComponent->SetSound(EndGameWinSoundCue);
@@ -58,40 +58,27 @@ void APacManGameMode::ActorEaten(AActor *EatenActor)
     }
     else if (APacManPawn *PacManPawn = Cast<APacManPawn>(EatenActor))
     {
+        for (AActor *Actor : Ghosts)
+        {
+            AGhostPawn *Ghost = Cast<AGhostPawn>(Actor);
+            Ghost->Idle();
+        }
+
         if (PacManPlayerController)
         {
             PacManPawn->HandleDestruction();
-            PacManPlayerController->ResetLocationAndRotation();
         }
 
-        if (PacManHUDWidget)
+        if (DeathAudioComponent)
         {
-            PacManHUDWidget->UpdateLives(PacManPawn->GetLives());
+            DeathAudioComponent->Play();
         }
-
-        if (EndGameWidgetClass && PacManPawn->GetLives() <= 0)
-        {
-            GameplayAudioComponent->SetSound(EndGameLoseSoundCue);
-            PacManEndGameWidget->AddToViewport();
-            PacManEndGameWidget->GameOver(false);
-        }
-        else
-        {
-            //RESET
-            for(AActor* Actor : Ghosts)
-            {
-                AGhostPawn* Ghost = Cast<AGhostPawn>(Actor);
-                Ghost->Idle();
-                Ghost->ResetGhostAndPhases();
-            }
-            HandleGameStart();
-        }
+        
     }
     else if (AGhostPawn *GhostPawn = Cast<AGhostPawn>(EatenActor))
     {
         GhostPawn->HandleDestruction();
     }
-    
 }
 
 void APacManGameMode::HandleGameStart()
@@ -137,10 +124,47 @@ void APacManGameMode::HandleGameStart()
 
     if (GameplaySoundCue && !GameplayAudioComponent)
     {
-	    GameplayAudioComponent = UGameplayStatics::SpawnSound2D(this, GameplaySoundCue);
+        GameplayAudioComponent = UGameplayStatics::SpawnSound2D(this, GameplaySoundCue);
     }
-    
-    
+
+    if (DeathSoundCue && !DeathAudioComponent)
+    {
+        DeathAudioComponent = UGameplayStatics::SpawnSound2D(this, DeathSoundCue);
+        DeathAudioComponent->Stop();
+        if (DeathAudioComponent)
+        {
+            DeathAudioComponent->OnAudioFinished.AddDynamic(this, &APacManGameMode::HandleGameEnd);
+        }
+    }
+}
+
+void APacManGameMode::HandleGameEnd()
+{
+    if (PacManPlayerController)
+    {
+        if (PacManHUDWidget)
+        {
+            PacManHUDWidget->UpdateLives(PacManPlayerController->GetPacManPawn()->GetLives());
+        }
+
+        if (EndGameWidgetClass && PacManPlayerController->GetPacManPawn()->GetLives() <= 0)
+        {
+            GameplayAudioComponent->SetSound(EndGameLoseSoundCue);
+            PacManEndGameWidget->AddToViewport();
+            PacManEndGameWidget->GameOver(false);
+        }
+        else
+        {
+            PacManPlayerController->ResetLocationAndRotation();
+
+            for (AActor *Actor : Ghosts)
+            {
+                AGhostPawn *Ghost = Cast<AGhostPawn>(Actor);
+                Ghost->ResetGhostAndPhases();
+            }
+            HandleGameStart();
+        }
+    }
 }
 
 int32 APacManGameMode::GetRegularPickupCount()
