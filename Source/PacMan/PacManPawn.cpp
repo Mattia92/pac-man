@@ -79,10 +79,21 @@ void APacManPawn::SetDirection(const FVector Direction)
 
 void APacManPawn::HandleDestruction()
 {
-	SetActorEnableCollision(false);
+	if (DeathParticleSystem)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathParticleSystem, GetActorTransform());
+	}
+	PacManMeshComponent->SetVisibility(false);
 	MovementScale = 0;
 	Frozen = true;
 	Lives--;
+}
+
+void APacManPawn::ResetToStart(FVector StartLocation, FRotator StartRotation)
+{
+	SetActorLocationAndRotation(StartLocation, StartRotation);
+    SetActorEnableCollision(true);
+	PacManMeshComponent->SetVisibility(true);
 }
 
 void APacManPawn::OnOverlapBegin(AActor *PlayerActor, AActor *OtherActor)
@@ -108,11 +119,17 @@ void APacManPawn::OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, U
 void APacManPawn::SpawnEmitterForDuration(float TimeDuration)
 {
 	FTimerHandle PowerUpParticleSystemTimerHandle;
-	PowerUpParticleSystemComponent = UGameplayStatics::SpawnEmitterAttached(PowerUpParticleSystem, GetRootComponent());
-    GetWorldTimerManager().SetTimer(PowerUpParticleSystemTimerHandle, this, &APacManPawn::DestroyEmitter, TimeDuration, false);
+	if (PowerUpParticleSystem)
+	{
+		PowerUpParticleSystemComponent = UGameplayStatics::SpawnEmitterAttached(PowerUpParticleSystem, GetRootComponent());
+		GetWorldTimerManager().SetTimer(PowerUpParticleSystemTimerHandle, this, &APacManPawn::DestroyEmitter, TimeDuration, false);
+	}
 }
 
 void APacManPawn::DestroyEmitter()
 {
-	PowerUpParticleSystemComponent->DeactivateSystem();
+	if (PowerUpParticleSystemComponent)
+	{
+		PowerUpParticleSystemComponent->DeactivateSystem();
+	}
 }

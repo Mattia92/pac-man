@@ -40,6 +40,7 @@ public:
 	int32 GetLives() { return Lives; }
 	void HandleDestruction();
 	void SpawnEmitterForDuration(float TimeDuration);
+	void ResetToStart(FVector StartLocation, FRotator StartRotation);
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -50,6 +51,8 @@ private:
 	class UFloatingPawnMovement *PacManFloatingPawnMovement;
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem *PowerUpParticleSystem;
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem *DeathParticleSystem;
 	UPROPERTY(EditAnywhere)
 	float MaxSpeed = 800.f;
 	UPROPERTY(EditAnywhere)

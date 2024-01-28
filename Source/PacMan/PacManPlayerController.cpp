@@ -41,8 +41,7 @@ void APacManPlayerController::ResetLocationAndRotation()
 {
     if (PacManPawn)
     {
-        PacManPawn->SetActorLocationAndRotation(StartLocation, StartRotation);
-        PacManPawn->SetActorEnableCollision(true);
+       PacManPawn->ResetToStart(StartLocation, StartRotation);
     }
 }
 

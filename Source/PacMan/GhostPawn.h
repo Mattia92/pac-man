@@ -79,6 +79,7 @@ private:
 	FTimerHandle GhostScatterPhaseTimerHandle;
 	FTimerHandle GhostChasePhaseTimerHandle;
 	FTimerHandle GhostFrightenedTimerHandle;
+	FTimerHandle GhostResetTimerHandle;
 	EGhostState PreviousGhostState;
 	FVector StartLocation;
 
@@ -91,5 +92,8 @@ private:
 	void ResetGhost();
 	void EnableFrightenedMode();
 	void PausePhaseTimers();
+	void PauseFrightenedTimer();
+	void PauseResetTimer();
+	void PauseAllTimers();
 	void UnPausePhaseTimers();
 };

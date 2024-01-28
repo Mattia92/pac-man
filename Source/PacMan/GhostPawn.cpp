@@ -129,7 +129,7 @@ void AGhostPawn::Frightened()
 void AGhostPawn::Idle()
 {
 	GhostState = EGhostState::Idle;
-	PausePhaseTimers();
+	PauseAllTimers();
 
 	if (AIGhostBlackboardComponent)
 	{
@@ -172,7 +172,6 @@ void AGhostPawn::OnActorHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UP
 	if (PacManGameMode && (GhostState == EGhostState::Chase || GhostState == EGhostState::Scatter) && OtherActor == PacManPawn)
 	{
 		PacManGameMode->ActorEaten(OtherActor);
-		Idle();
 	}
 }
 
@@ -206,7 +205,6 @@ void AGhostPawn::StartPhaseFour()
 void AGhostPawn::RespawnGhost()
 {
 	MeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Block);
-	FTimerHandle GhostResetTimerHandle;
     GetWorldTimerManager().SetTimer(GhostResetTimerHandle, this, &AGhostPawn::ResetGhost, ResetTime, false);
 }
 
@@ -261,6 +259,29 @@ void AGhostPawn::PausePhaseTimers()
 	{
 		GetWorldTimerManager().PauseTimer(GhostChasePhaseTimerHandle);
 	}
+}
+
+void AGhostPawn::PauseFrightenedTimer()
+{
+	if (GetWorldTimerManager().IsTimerActive(GhostFrightenedTimerHandle))
+	{
+		GetWorldTimerManager().PauseTimer(GhostFrightenedTimerHandle);
+	}
+}
+
+void AGhostPawn::PauseResetTimer()
+{
+	if (GetWorldTimerManager().IsTimerActive(GhostResetTimerHandle))
+	{
+		GetWorldTimerManager().PauseTimer(GhostResetTimerHandle);
+	}
+}
+
+void AGhostPawn::PauseAllTimers()
+{
+	PausePhaseTimers();
+	PauseFrightenedTimer();
+	PauseResetTimer();
 }
 
 void AGhostPawn::UnPausePhaseTimers()

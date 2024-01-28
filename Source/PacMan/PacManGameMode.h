@@ -50,7 +50,7 @@ private:
 	int32 RegularPickups = 0;
 
 	UFUNCTION()
-	void HandleGameEnd();
+	void HandleGameReset();
 	void HandleGameStart();
 	void IncreaseScore(int32 ScoreAmount);
 	void DeactivateEmitter();
