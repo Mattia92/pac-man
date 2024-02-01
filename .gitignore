@@ -46,10 +46,6 @@
 SourceArt/**/*.png
 SourceArt/**/*.tga
 
-# Content Assets
-Content/Pacman/*
-Content/StarterContent/*
-
 # Binary Files
 Binaries/*
 Plugins/*/Binaries/*
